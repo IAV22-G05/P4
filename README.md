@@ -239,10 +239,24 @@ Se implementa con un script que herada de "Unit":
           
           
      Se usa el árbol de comportamiento COMBAT.
-                
-### Elementos a implementar
+     
+### Árboles de comportamiento (Pinchar en las imágenes para verlas a mejor resolución)
 
-#### Mapa de influemcia
+### Árbol COMBAT
+![Arbol combate 1](https://user-images.githubusercontent.com/62661210/164340196-98c9397d-6f2e-42ba-a102-6589db25befa.png)
+![Arbol Combate 2](https://user-images.githubusercontent.com/62661210/164340337-e60df688-ed4c-49b6-b73e-7b3a2be48de7.png)
+
+### Árbol DEFENSE
+![Arbol Defense](https://user-images.githubusercontent.com/62661210/164340380-114ee2b7-dd55-4fb1-937c-ffa53f5a95cc.png)
+
+### Árbol EXTRACTION
+![Arbol Extraccion 1](https://user-images.githubusercontent.com/62661210/164340401-067f834c-ef13-4d7f-ad06-2bab6c0d53ca.png)
+![Arbol Extraccion 2](https://user-images.githubusercontent.com/62661210/164340405-44e16750-f704-4b61-a0bf-ae08e126eaa9.png)
+
+                
+## Elementos a implementar
+
+### Mapa de influemcia
 
 El mapa que utilizarán los controladores para tomar decisiones se implementará mediante un algoritmo de Map Flooding:
 
