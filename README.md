@@ -240,6 +240,73 @@ Se implementa con un script que herada de "Unit":
           
      Se usa el árbol de comportamiento COMBAT.
      
+     ### RTSControllers
+Son los scripts encargados de controlar como su nombre indican, el juego en sí.
+Son los que mandan las órdenes de qué hacer a cada tropa, usando funciones auxiliares del GameManager.
+
+No vamos a entrar en mucho detalle en las ya implementadas pues sirven un poco como ejemplos pero hay que hacer unos nuevos.
+
+El primero es el RTSPlayerController:
+          
+          Se usa si un ejercito lo quiere controlar evidentemente un jugador y no la máquina.
+          Funciona con una UI Layout.
+          
+          Tiene una función que gestiona los botones de la UI e instancia las tropas que se ordenen si es posible.
+          
+          Luego, en su update, implementa un sistema que por ejemplo, puede mover tropas seleccionándolas y marcando su siguiente posición.
+          
+Luego tenemos un RTSAIControllerExample:
+          
+          Este es un ejemplo de IA de control de ejercitos.
+          
+          Es muy simple, tiene una función Think que, de forma aleatoria, cada 0.5 segundos ordena una acción a las tropas.
+
+### Managers
+
+Para la gestión de la partida se usan 2 managers.
+
+#### Scenario Manager
+No vamos a entrar mucho en detalle pues no nos interesa demasiado para la IA, basicamente se encarga de controlar elementos del escenario como cámaras,
+velocidad de juego o gestionar las listas de elementos neutrales en caso de destrucción.
+
+Su función para las unidades es acceder a esos elementos y puedan percibir y actuar en respuesta a situaciones tácticas como estar cerca de peligrosas torretas o de interesantes recursos.
+
+#### RTS Game Manager
+Es un singleton muy importante pues además de incializar el juego, es el que tiene todas estas funciones auxiliares que usan los controladores para crear o 
+mover unidades.
+
+El gestor del juego es responsable de poner en marcha el juego, iniciando su estado y llevando un seguimiento de todos sus cambios.
+Mantiene el registro de todas las instalaciones y unidades creadas y activas, de manera que los bots tácticos puedan percibir y actuar en respuesta a situaciones tácticas como el ser atacados o pillar desprevenida la base enemiga.
+
+     Tiene variables como
+     Initial_Money = de cada bando
+     
+     (Estas para cada tipo de unidad)
+     Extraction_unit_cost
+     Extraction_unit_max
+     Extraction_unit_Prefab (para poder instanciar objetos)
+     
+     Tiene listas para todos los elementos dinámicos de RTS
+     List<BaseFacility>...
+     List<ExplorationUnit>...
+     
+     Enumeración de métodos que usa 
+     GetMoney()
+     GetBaseFacilities()
+     GetProcessingFacilities()
+     GetExtractionUnits()
+     GetExplorationUnits()
+     GetDestructionUnits()
+     
+     Process() Devuelve la cantidad de dinero obtenida tras procesar "especia"
+     CreateUnit() Devuelve una referencia a la unidad creada
+     MoveUnit() Se solicita el movimiento de una unidad a un objeto concreto
+     StopUnit()
+     
+     UnitDestroyed() Cuando una unidad va a ser destruida, avisa antes de autodestruirse para que se la elimine de las listas del gestor del juego
+     FacilityDestroyed() 
+     
+     
 ### Árboles de comportamiento (Pinchar en las imágenes para verlas a mejor resolución)
 
 ### Árbol COMBAT
@@ -254,9 +321,12 @@ Se implementa con un script que herada de "Unit":
 ![Arbol Extraccion 2](https://user-images.githubusercontent.com/62661210/164340405-44e16750-f704-4b61-a0bf-ae08e126eaa9.png)
 
                 
-## Elementos a implementar
+## Resolución de prototipo y Elementos a implementar
+Para acabar este prototipo se pide implementar un controlador RTS por IA que juegue de manera lógica, gestionando adecuadamente las tropas y sus movimientos.
 
-### Mapa de influemcia
+Para que la IA pueda realizar una buena partida se implementará un mapa de influencia.
+
+### Mapa de influencia
 
 El mapa que utilizarán los controladores para tomar decisiones se implementará mediante un algoritmo de Map Flooding:
 
@@ -337,5 +407,8 @@ El mapa que utilizarán los controladores para tomar decisiones se implementará
      // La lista de cerrados contiene todas las localizaciones que le pertenecen a cada controlador
      return closed
 
-     
+## Referencias
+-AI_for_Games_third_edition_2019_Ian_Millington
+
+-Dune 2021 by Denis Villeneuve
       
