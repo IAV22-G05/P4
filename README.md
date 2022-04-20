@@ -240,9 +240,88 @@ Se implementa con un script que herada de "Unit":
           
      Se usa el árbol de comportamiento COMBAT.
                 
+### Elementos a implementar
+
+#### Mapa de influemcia
+
+El mapa que utilizarán los controladores para tomar decisiones se implementará mediante un algoritmo de Map Flooding:
+
+   Función que calcula la fuerza en cada casilla
+    
+     function strengthFunction(city: City, location: Location) -> float
      
+   Estructura utilizada para guardar la información necesaria para cada posición
      
+     class LocationRecord:
+     location: Location
+     nearestCity: City
+     strength: float
      
+   function mapfloodDijkstra(map: Map, cities: City[], strengthThreshold: float, strengthFunction: function) -> LocationRecord[]:
+     
+     // Inicializa y abre las listas de nodos
+     open = new PathfindingList()
+     closed = new PathfindingList()
+     
+     // Inicializa el record para los nodos de inicio
+     for city in cities:
+     startRecord = new LocationRecord()
+     startRecord.location = city.getLocation()
+     startRecord.city = city
+     startRecord.strength = city.getStrength()
+     open += startRecord
+     
+     // Itera procesando cada nodo
+     while open:
+          // Encuentra el mayor elemento en la lista de abiertos
+          current = open.largestElement()
+     
+          // Obtiene sus vecinos
+          locations = map.getNeighbors(current.location)
+
+          // Itera por cada localización vecina
+          for location in locations:
+          // Obtiene la fuerza en el nodo final
+          strength = strengthFunction(current.city, location)
+
+          // Lo omite si la fuerza es demasiado baja
+          if strength < strengthThreshold:     
+               continue
+     
+          // O si está cerrado y la ruta es peor
+          else if closed.contains(location):
+          // Encuentra el récord en la lista de cerrados
+               neighborRecord = closed.find(location)
+               if neighborRecord.city != current.city and neighborRecord.strength < strength:
+                    continue
+          
+          // O si está abierto y la ruta es peor
+          else if open.contains(location):
+               // Encuentra el récord en la lista de abiertos
+               neighborRecord = open.find(location)
+               if neighborRecord.strength < strength:
+                    continue
+          
+          // Si no, ha encontrado un nodo no visitado, así que le crea un record
+          else:
+               neighborRecord = new NodeRecord()
+               neighborRecord.location = location
+          
+          // Si ha llegado aquí tiene que actualizar el nodo
+          // Actualiza el coste y la conexión
+          neighborRecord.city = current.city
+          neighborRecord.strength = strength
+          
+          // Y lo añade a la lista de abiertos
+          if not open.contains(location):
+               open += neighborRecord
+     
+     // Ha terminado de mirar los vecinos del nodo actual, así que lo elimina de la lista de abiertos y lo añade a la de cerrados
+     open -= current
+     closed += current
+     
+     // La lista de cerrados contiene todas las localizaciones que le pertenecen a cada controlador
+     return closed
 
      
       
