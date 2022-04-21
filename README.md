@@ -406,9 +406,15 @@ El mapa que utilizarán los controladores para tomar decisiones se implementará
      
      // La lista de cerrados contiene todas las localizaciones que le pertenecen a cada controlador
      return closed
+     
+### Propuesta de nivel 
+Nivel que se va a intentar implementar.
+![grietadelinvocador](https://user-images.githubusercontent.com/62719876/164423096-0db17b8a-4bbc-463e-817c-eaa735d20e98.png)
 
 ## Referencias
 -AI_for_Games_third_edition_2019_Ian_Millington
 
--Dune 2021 by Denis Villeneuve
+-Dune 2021 by Denis Villeneuve https://www.youtube.com/watch?v=8g18jFHCLXk
+
+-League of Legends 2009 Riot Games (vease grieta del invocador)
       
