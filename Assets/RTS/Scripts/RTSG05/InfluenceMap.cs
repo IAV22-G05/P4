@@ -29,16 +29,19 @@ namespace es.ucm.fdi.iav.rts
                 {
                     position.x = j * cellSize;
                     position.z = i * cellSize;
-                    id = GridToId(j, i);
+                    id = GridToId(i, j);
 
                     vertexObjs[id] = Instantiate(vertexPrefab, position, Quaternion.identity) as GameObject;
                     vertexObjs[id].name = vertexObjs[id].name.Replace("(Clone)", id.ToString());
                     Vertex v = vertexObjs[id].AddComponent<Vertex>();
                     v.id = id;
+                    v.strength = 5;
                     vertices.Add(v);
                     neighbors.Add(new List<Vertex>());
+                    Debug.Log(id);
                 }
             }
+            Influence_Debug();
             for (int i = 0; i < numRows; i++)
             {
                 for (int j = 0; j < numCols; j++)
@@ -46,6 +49,7 @@ namespace es.ucm.fdi.iav.rts
                     SetNeighbours(j, i);
                 }
             }
+
         }
 
         public BinaryHeap<Vertex> mapFloodDijkstra(int index)
@@ -128,6 +132,26 @@ namespace es.ucm.fdi.iav.rts
                 strength += 1 / Vector3.Distance(vertexPos, explorationUnits[i].transform.position);
 
             return strength;
+        }
+
+
+        public void Influence_Debug()
+        {
+            for (int i = 0; i < numRows; ++i)
+            {
+                for (int j = 0; j < numCols; ++j)
+                {
+                    //Setear el material en funcion de la fuerza de 
+                    int id = GridToId(i, j);
+                    Material mat = vertexObjs[id].GetComponent<MeshRenderer>().material;
+
+                    //Azul
+                    //5, 3, 1
+                    float colorFactor = vertices[id].strength / 5;
+                    Color newColor = new Color(0, colorFactor, 0, 0.3f);
+                    mat.SetColor("_Color", newColor);
+                }
+            }
         }
     }
 }

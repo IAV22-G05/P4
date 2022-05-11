@@ -61,12 +61,12 @@ namespace es.ucm.fdi.iav.rts
             int col = x;
             int row = y;
             int i, j;
-            int vertexId = GridToId(x, y);
+            int vertexId = GridToId(y, x);
 
             //Introducimos una lista de vertices vecinos por cada nodo (creo que esto se hace arriba y realmente lo estamos sobrescribiendo)
             //Lo mismo para costes
             neighbors[vertexId] = new List<Vertex>();
-            costs[vertexId] = new List<float>();
+            //costs[vertexId] = new List<float>();
 
             //Creamos el array de posiciones vecinas
             Vector2[] pos = new Vector2[0];
@@ -113,7 +113,6 @@ namespace es.ucm.fdi.iav.rts
                 //Si ha sido valida la introducimos definitivamente
                 int id = GridToId(j, i);
                 neighbors[vertexId].Add(vertices[id]);
-                costs[vertexId].Add(defaultCost);
             }
         }
 
