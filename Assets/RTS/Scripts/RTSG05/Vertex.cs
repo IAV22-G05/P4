@@ -28,7 +28,8 @@ namespace es.ucm.fdi.iav.rts
         /// </summary>
         public int id;
 
-        public float cost;
+        public float strength;
+        public int controller;
 
         public int CompareTo(object obj)
         {
@@ -36,14 +37,14 @@ namespace es.ucm.fdi.iav.rts
 
             Vertex other = obj as Vertex;
             if (other != null)
-                return this.cost.CompareTo(other.cost);
+                return this.strength.CompareTo(other.strength);
             else
                 throw new ArgumentException("Object is not a Vertex");
         }
 
         public int CompareTo(Vertex other)
         {
-            return (int)(cost - other.cost);
+            return (int)(strength - other.strength);
         }
 
         public override bool Equals(object obj)

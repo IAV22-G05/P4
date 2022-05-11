@@ -9,9 +9,9 @@
    Revisi�n: Federico Peinado 
    Contacto: email@federicopeinado.com
 */
-using System; 
+using System;
 using System.Collections.Generic;
-using UnityEngine; 
+using UnityEngine;
 
 namespace es.ucm.fdi.iav.rts
 {
@@ -26,9 +26,9 @@ namespace es.ucm.fdi.iav.rts
     public class RTSGameManager : MonoBehaviour
     {
         // Enumerado con los tipos de instalaciones admitidas 
-        public enum FacilityType {BASE, PROCESSING};
+        public enum FacilityType { BASE, PROCESSING };
         // Enumerado con los tipos de unidades admitidas 
-        public enum UnitType {EXTRACTION, EXPLORATION, DESTRUCTION};
+        public enum UnitType { EXTRACTION, EXPLORATION, DESTRUCTION };
 
         // Lista con todos los controladores. Lo esperado es que sean 2 (a cada uno com�nmente le llamaremos por el �ndice en esta lista + 1; ej. Jugador 1 vs Jugador 2).
         [SerializeField] private List<RTSController> _controllers = null;
@@ -70,7 +70,6 @@ namespace es.ucm.fdi.iav.rts
         private GameObject DestructionUnitEvenPrefab { get { return _destructionUnitEvenPrefab; } }
         [SerializeField] private GameObject _destructionUnitOddPrefab = null;
         private GameObject DestructionUnitOddPrefab { get { return _destructionUnitOddPrefab; } }
-
         // Utiliza un sencillo patr�n Singleton para dar acceso global y eliminar duplicados, aunque no crea un objeto si no estamos en una escena ni se mantiene si cambiamos de escena
         private static RTSGameManager _instance;
         public static RTSGameManager Instance { get { return _instance; } }
@@ -104,7 +103,6 @@ namespace es.ucm.fdi.iav.rts
             else
             {
                 _instance = this;
-
                 // Se asigna la cantidad inicial de dinero a cada jugador 
                 foreach (var controller in Controllers)
                     ControllersMoney.Add(InitialMoney);
@@ -126,26 +124,26 @@ namespace es.ucm.fdi.iav.rts
         // Inicializa el estado del juego en relaci�n a otros objetos, activando todas las instalaciones y unidades del juego
         private void Start()
         {
-                // Se activan todas las instalaciones y unidades, asign�ndoles su controlador correspondiente
-                for (int index = 0; index < Controllers.Count; index++)
-                {
-                    var controller = Controllers[index];
+            // Se activan todas las instalaciones y unidades, asign�ndoles su controlador correspondiente
+            for (int index = 0; index < Controllers.Count; index++)
+            {
+                var controller = Controllers[index];
 
-                    foreach (var baseFacility in ControllersBaseFacilities[index])
-                        baseFacility.Enable(controller);
+                foreach (var baseFacility in ControllersBaseFacilities[index])
+                    baseFacility.Enable(controller);
 
-                    foreach (var processingFacility in ControllersProcessingFacilities[index])
-                        processingFacility.Enable(controller);
+                foreach (var processingFacility in ControllersProcessingFacilities[index])
+                    processingFacility.Enable(controller);
 
-                    foreach (var extractionUnit in ControllersExtractionUnits[index])
-                        extractionUnit.Enable(controller);
+                foreach (var extractionUnit in ControllersExtractionUnits[index])
+                    extractionUnit.Enable(controller);
 
-                    foreach (var explorationUnit in ControllersExplorationUnits[index])
-                        explorationUnit.Enable(controller);
+                foreach (var explorationUnit in ControllersExplorationUnits[index])
+                    explorationUnit.Enable(controller);
 
-                    foreach (var destructionUnit in ControllersDestructionUnits[index])
-                        destructionUnit.Enable(controller);
-            }     
+                foreach (var destructionUnit in ControllersDestructionUnits[index])
+                    destructionUnit.Enable(controller);
+            }
         }
 
         // Devuelve el �ndice correspondiente al controlador que nos pasan.
@@ -181,7 +179,7 @@ namespace es.ucm.fdi.iav.rts
         // Devuelve el dinero que tiene el controlador correspondiente al �ndice introducido.
         // Si el �ndice es menor que cero, o igual o mayor que la cantidad de controladores que hay, saltar� una excepci�n.
         public int GetMoney(int index)
-        { 
+        {
             return ControllersMoney[index];
         }
 
@@ -226,7 +224,7 @@ namespace es.ucm.fdi.iav.rts
         public int Process(ProcessingFacility facility)
         {
             if (facility == null)
-                throw new ArgumentNullException();                       
+                throw new ArgumentNullException();
 
             if (facility.Resources <= 0)
                 throw new ArgumentException("Se est� intentando procesar recursos en una instalaci�n que no los tiene");
@@ -248,9 +246,9 @@ namespace es.ucm.fdi.iav.rts
         // Se solicita la creaci�n de una nueva unidad de cierto tipo en una instalaci�n base, gastando el dinero del controlador correspondiente para crear y pedir situarla en dicha instalaci�n.  
         // Por seguridad se pide la referencia al controlador que da la orden y se lanzan excepciones si no hay instalaci�n base o si el controlador correspondiente no tiene dinero suficiente para crear esa unidad.
         // Devuelve una referencia a la unidad creada.
-        public Unit CreateUnit(RTSController controller, BaseFacility facility, UnitType type) 
+        public Unit CreateUnit(RTSController controller, BaseFacility facility, UnitType type)
         {
-            if (controller == null || facility == null) 
+            if (controller == null || facility == null)
                 throw new ArgumentNullException();
 
             int index = GetIndex(controller);
@@ -262,38 +260,39 @@ namespace es.ucm.fdi.iav.rts
             GameObject prefab = null; // Valor inicial que luego se sobreescribe 
             switch (type)
             {
-                case UnitType.EXTRACTION: 
+                case UnitType.EXTRACTION:
                     if (ControllersExtractionUnits[index].Count >= ExtractionUnitsMax)
                         throw new Exception("No se pueden crear m�s unidades de extracci�n de las que ya posee este controlador.");
                     cost = ExtractionUnitCost;
                     if (index % 2 == 0) // El jugador de �ndice 0 tiene �ndice par, y el de �ndice 1, impar
                         prefab = ExtractionUnitEvenPrefab;
                     else
-                        prefab = ExtractionUnitOddPrefab; 
+                        prefab = ExtractionUnitOddPrefab;
                     break;
-                case UnitType.EXPLORATION: 
+                case UnitType.EXPLORATION:
                     if (ControllersExplorationUnits[index].Count >= ExplorationUnitsMax)
                         throw new Exception("No se pueden crear m�s unidades de exploraci�n de las que ya posee este controlador.");
                     cost = ExplorationUnitCost;
                     if (index % 2 == 0)  // El jugador de �ndice 0 tiene �ndice par, y el de �ndice 1, impar
                         prefab = ExplorationUnitEvenPrefab;
                     else
-                        prefab = ExplorationUnitOddPrefab; 
+                        prefab = ExplorationUnitOddPrefab;
                     break;
-                case UnitType.DESTRUCTION: 
+                case UnitType.DESTRUCTION:
                     if (ControllersDestructionUnits[index].Count >= DestructionUnitsMax)
                         throw new Exception("No se pueden crear m�s unidades de destrucci�n de las que ya posee este controlador.");
                     cost = DestructionUnitCost;
                     if (index % 2 == 0)  // El jugador de �ndice 0 tiene �ndice par, y el de �ndice 1, impar
                         prefab = DestructionUnitEvenPrefab;
                     else
-                        prefab = DestructionUnitOddPrefab; 
+                        prefab = DestructionUnitOddPrefab;
                     break;
             }
 
             // Se comprueba que el coste es asumible
-            if (cost > ControllersMoney[index]) { 
-                throw new ArgumentException("El controlador no tiene dinero para pagar una unidad de coste " + cost + "."); 
+            if (cost > ControllersMoney[index])
+            {
+                throw new ArgumentException("El controlador no tiene dinero para pagar una unidad de coste " + cost + ".");
             }
 
             // Se comprueba que es posible situar la unidad en una posici�n correcta de la instalaci�n
@@ -340,7 +339,7 @@ namespace es.ucm.fdi.iav.rts
         // Cada tipo de unidad sabr� qu� variables deben cambiar para que su �rbol de comportamiento act�e debidamente.
         // Posibles mejoras: 
         // - Se podr�a devolver un booleano para saber si el movimiento se pudo realizar sin problemas.
-        public void MoveUnit(RTSController controller, Unit unit, Transform transform) 
+        public void MoveUnit(RTSController controller, Unit unit, Transform transform)
         {
             if (controller == null)
                 throw new ArgumentNullException("No se ha pasado un controlador.");
@@ -395,7 +394,7 @@ namespace es.ucm.fdi.iav.rts
             if (controller == null)
                 throw new ArgumentNullException("No se ha pasado un controlador.");
             if (unit == null)
-                throw new ArgumentNullException("No se ha pasado una unidad."); 
+                throw new ArgumentNullException("No se ha pasado una unidad.");
 
             int index = GetIndex(controller);
             if (index != unit.GetControllerIndex())
@@ -407,7 +406,8 @@ namespace es.ucm.fdi.iav.rts
         // Cuando una unidad va a ser destruida, avisa antes de autodestruirse para que se la elimine de las listas del gestor del juego.
         // Posibles mejoras: 
         // - Se podr�a ir llevando una puntuaci�n de cuantas unidades ha destruido cada ej�rcito, por ejemplo... junto con otras estad�sticas
-        public void UnitDestroyed(Unit unit) {
+        public void UnitDestroyed(Unit unit)
+        {
             if (unit == null)
                 throw new ArgumentNullException("No se ha pasado una unidad.");
 
@@ -432,7 +432,7 @@ namespace es.ucm.fdi.iav.rts
                 Debug.Log("Unidad de destrucci�n [ C" + index + " ] destruida. Quedan " + ControllersDestructionUnits[index].Count);
             }
 
-       }
+        }
 
         // Cuando una instalaci�n va a ser destruida, avisa antes de autodestruirse para que se la elimine de las listas del gestor del juego.
         // Posibles mejoras: Si han acabado con todas las unidades base de un ej�rcito, se podr�a mostrar un mensaje en la GUI de que ha perdido el juego.
@@ -448,7 +448,8 @@ namespace es.ucm.fdi.iav.rts
                 ControllersBaseFacilities[index].Remove((BaseFacility)facility);
                 // Mostramos informaci�n de lo que pasa en el juego al menos en consola
                 Debug.Log("Instalaci�n base [ C" + index + " ] destruida. Quedan " + ControllersBaseFacilities[index].Count);
-                if (ControllersBaseFacilities[index].Count == 0) { 
+                if (ControllersBaseFacilities[index].Count == 0)
+                {
                     Debug.Log("*** PARTIDA FINALIZADA ***");
                     // Se deber�a pausar el juego incluso, tener un booleano gameOver o as� y mostrarlo por pantalla... 
                 }

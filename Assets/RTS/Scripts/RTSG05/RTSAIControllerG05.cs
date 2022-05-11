@@ -10,7 +10,7 @@ namespace es.ucm.fdi.iav.rts.G05
         private ProcessingFacility MyFirstProcessingFacility { get; set; }
         private BaseFacility FirstEnemyFirstBaseFacility { get; set; }
         private ProcessingFacility FirstEnemyFirstProcessingFacility { get; set; }
-
+        private InfluenceMap influenceMap;
         // Número de paso de pensamiento 
         private int ThinkStepNumber { get; set; } = 0;
 
@@ -22,13 +22,14 @@ namespace es.ucm.fdi.iav.rts.G05
         {
             Name = "Final";
             Author = "Sergio Molinero-Andrés Carnicero";
+            influenceMap.Load();
         }
 
         // El método de pensar que sobreescribe e implementa el controlador, para percibir (hacer mapas de influencia, etc.) y luego actuar.
         protected override void Think()
         {
             // Actualizo el mapa de influencia 
-            // ...
+            influenceMap.mapFloodDijkstra(MyIndex);
 
             // Para las órdenes aquí estoy asumiendo que tengo dinero de sobra y que se dan las condiciones de todas las cosas...
             // (Ojo: esto no debería hacerse porque si me equivoco, causaré fallos en el juego... hay que comprobar que cada llamada tiene sentido y es posible hacerla)
@@ -54,7 +55,7 @@ namespace es.ucm.fdi.iav.rts.G05
                     FirstEnemyFirstProcessingFacility = RTSGameManager.Instance.GetProcessingFacilities(FirstEnemyIndex)[0];
 
                     // Construyo por primera vez el mapa de influencia (con las 'capas' que necesite)
-                    // ...
+                    
                     break;
 
                 case 1:

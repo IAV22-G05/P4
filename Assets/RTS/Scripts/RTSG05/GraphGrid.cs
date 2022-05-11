@@ -41,7 +41,7 @@ namespace es.ucm.fdi.iav.rts
         }
 
         //Convertidor de id a posicion 
-        private Vector2 IdToGrid(int id)
+        protected Vector2 IdToGrid(int id)
         {
             Vector2 location = Vector2.zero;
             location.y = Mathf.Floor(id / numCols);

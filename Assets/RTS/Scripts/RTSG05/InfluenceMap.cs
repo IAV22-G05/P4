@@ -1,16 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-namespace es.ucm.fdi.iav.rts.G05
+namespace es.ucm.fdi.iav.rts
 {
     public class InfluenceMap : GraphGrid
     {
-        struct LocationRecord
-        {
-            int controllerIndex;
-            float strength;
-        }
+        [SerializeField]
+        float strengthThreshold = 1;
 
         public override void Load()
         {
@@ -39,7 +37,7 @@ namespace es.ucm.fdi.iav.rts.G05
                     v.id = id;
                     vertices.Add(v);
                     neighbors.Add(new List<Vertex>());
-                } 
+                }
             }
             for (int i = 0; i < numRows; i++)
             {
@@ -50,15 +48,86 @@ namespace es.ucm.fdi.iav.rts.G05
             }
         }
 
-        public void mapFloodDijkstra(int index)
+        public BinaryHeap<Vertex> mapFloodDijkstra(int index)
         {
             BinaryHeap<Vertex> open = new BinaryHeap<Vertex>();
             BinaryHeap<Vertex> closed = new BinaryHeap<Vertex>();
-            LocationRecord startRecord;
-            for(int i = 0; i < 2; ++i)
-            {
+            Vertex start;
+            Vertex current;
+            Vertex neighborRecord;
+            List<BaseFacility> bases = RTSGameManager.Instance.GetBaseFacilities(index);
+            float strength;
 
+            for (int i = 0; i < bases.Count(); ++i)
+            {
+                start = GetNearestVertex(bases[i].transform.position);
+                start.controller = index;
+                start.strength = strengthFunction(start.controller, start) + 5;
+                open.Add(start);
             }
+
+            while (open.Count > 0)
+            {
+                current = open.Top;
+                open.Remove();
+
+                List<Vertex> neighbours = neighbors[current.id];
+
+                foreach (Vertex v in neighbours)
+                {
+                    strength = strengthFunction(current.controller, v);
+
+                    if (strength < strengthThreshold)
+                        continue;
+                    else if (closed.Contains(v))
+                    {
+                        neighborRecord = closed.Find(v);
+                        if (neighborRecord.controller != v.controller && neighborRecord.strength < strength)
+                            continue;
+                    }
+                    else if (open.Contains(v))
+                    {
+                        neighborRecord = open.Find(v);
+                        if (neighborRecord.strength < strength)
+                            continue;
+                    }
+                        
+                    neighborRecord = new Vertex();
+                    neighborRecord.controller = current.controller;
+                    neighborRecord.strength = strength;
+                    open.Add(neighborRecord);
+                }
+
+                open.Remove(current);
+                closed.Add(current);
+            }
+
+            return closed;
+        }
+
+        public float strengthFunction(int controller, Vertex v)
+        {
+            float strength = 0;
+            List<BaseFacility> bases = RTSGameManager.Instance.GetBaseFacilities(controller);
+            if (bases.Count <= 0)
+                return 0;
+
+            Vector3 vertexPos = IdToGrid(v.id);
+            // xd
+            vertexPos.z = vertexPos.y;
+            vertexPos.y = 0;
+            for (int i = 0; i < bases.Count; ++i)
+                strength += 5 / Vector3.Distance(vertexPos, bases[i].transform.position);
+
+            List<DestructionUnit> destructionUnits = RTSGameManager.Instance.GetDestructionUnits(controller);
+            for (int i = 0; i < destructionUnits.Count; ++i)
+                strength += 3 / Vector3.Distance(vertexPos, destructionUnits[i].transform.position);
+
+            List<ExplorationUnit> explorationUnits = RTSGameManager.Instance.GetExplorationUnits(controller);
+            for (int i = 0; i < explorationUnits.Count; ++i)
+                strength += 1 / Vector3.Distance(vertexPos, explorationUnits[i].transform.position);
+
+            return strength;
         }
     }
 }
