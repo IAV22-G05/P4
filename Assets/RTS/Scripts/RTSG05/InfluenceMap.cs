@@ -10,6 +10,12 @@ namespace es.ucm.fdi.iav.rts
         [SerializeField]
         float strengthThreshold = 1;
 
+        [SerializeField]
+        //true Harkonen, false Fremen
+        bool bando = true;
+
+        const int MAX_STRENGTH = 5;
+
         public override void Load()
         {
             numCols = (int)(RTSScenarioManager.Instance.Scenario.terrainData.size.x / 10);
@@ -151,10 +157,17 @@ namespace es.ucm.fdi.iav.rts
                         int id = GridToId(i, j);
                         Material mat = vertexObjs[id].GetComponent<MeshRenderer>().material;
 
-                        //Azul
-                        //5, 3, 1
-                        float colorFactor = vertices[id].strength / 5;
-                        Color newColor = new Color(0, colorFactor, 0, 0.3f);
+                        float colorFactor = vertices[id].strength / MAX_STRENGTH;
+                        float inverse = 1 - colorFactor;
+                        Color newColor;
+
+                        //Harkonen Azul
+                        if (bando)
+                            newColor = new Color(inverse, inverse, 1, 0.3f);
+                        //Fremen Amarillo
+                        else
+                            newColor = new Color(1, 1, inverse, 0.3f);
+
                         mat.SetColor("_Color", newColor);
                     }
                 }
