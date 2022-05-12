@@ -27,18 +27,21 @@ namespace es.ucm.fdi.iav.rts
             {
                 for (int j = 0; j < numCols; ++j)
                 {
-                    position.x = j * cellSize;
-                    position.z = i * cellSize;
+                    position.x = j * cellSize + RTSScenarioManager.Instance.Scenario.GetPosition().x;
+                    position.z = i * cellSize + RTSScenarioManager.Instance.Scenario.GetPosition().z;
                     id = GridToId(i, j);
-
-                    vertexObjs[id] = Instantiate(vertexPrefab, position, Quaternion.identity) as GameObject;
-                    vertexObjs[id].name = vertexObjs[id].name.Replace("(Clone)", id.ToString());
-                    Vertex v = vertexObjs[id].AddComponent<Vertex>();
-                    v.id = id;
-                    v.strength = 5;
-                    vertices.Add(v);
-                    neighbors.Add(new List<Vertex>());
-                    Debug.Log(id);
+                    bool isVertex = (RTSScenarioManager.Instance.Scenario.SampleHeight(position) == 0);
+                    mapVertices[i, j] = isVertex;
+                    if (isVertex)
+                    {
+                        vertexObjs[id] = Instantiate(vertexPrefab, position, Quaternion.identity) as GameObject;
+                        vertexObjs[id].name = vertexObjs[id].name.Replace("(Clone)", id.ToString());
+                        Vertex v = vertexObjs[id].AddComponent<Vertex>();
+                        v.id = id;
+                        v.strength = 5;
+                        vertices.Add(v);
+                        neighbors.Add(new List<Vertex>());
+                    }
                 }
             }
             Influence_Debug();
@@ -141,15 +144,18 @@ namespace es.ucm.fdi.iav.rts
             {
                 for (int j = 0; j < numCols; ++j)
                 {
-                    //Setear el material en funcion de la fuerza de 
-                    int id = GridToId(i, j);
-                    Material mat = vertexObjs[id].GetComponent<MeshRenderer>().material;
+                    if (mapVertices[i, j])
+                    {
+                        //Setear el material en funcion de la fuerza de 
+                        int id = GridToId(i, j);
+                        Material mat = vertexObjs[id].GetComponent<MeshRenderer>().material;
 
-                    //Azul
-                    //5, 3, 1
-                    float colorFactor = vertices[id].strength / 5;
-                    Color newColor = new Color(0, colorFactor, 0, 0.3f);
-                    mat.SetColor("_Color", newColor);
+                        //Azul
+                        //5, 3, 1
+                        float colorFactor = vertices[id].strength / 5;
+                        Color newColor = new Color(0, colorFactor, 0, 0.3f);
+                        mat.SetColor("_Color", newColor);
+                    }
                 }
             }
         }
