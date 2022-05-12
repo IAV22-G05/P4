@@ -32,7 +32,7 @@ namespace es.ucm.fdi.iav.rts
 
         // Lista con todos los controladores. Lo esperado es que sean 2 (a cada uno com�nmente le llamaremos por el �ndice en esta lista + 1; ej. Jugador 1 vs Jugador 2).
         [SerializeField] private List<RTSController> _controllers = null;
-        private List<RTSController> Controllers { get { return _controllers; } }
+        public List<RTSController> Controllers { get { return _controllers; } }
 
         // Cantidad inicial de dinero con la que empiezan los controladores
         [SerializeField] private int _initialMoney = 50000;

@@ -32,7 +32,6 @@ namespace es.ucm.fdi.iav.rts
         protected int numCols;
         protected int numRows;
         protected GameObject[] vertexObjs;
-        protected bool[,] mapVertices;
 
         //Convertidor de posicion a id para las listas
         protected int GridToId(int x, int y)
@@ -62,7 +61,6 @@ namespace es.ucm.fdi.iav.rts
             int row = y;
             int i, j;
             int vertexId = GridToId(y, x);
-
             //Introducimos una lista de vertices vecinos por cada nodo (creo que esto se hace arriba y realmente lo estamos sobrescribiendo)
             //Lo mismo para costes
             neighbors[vertexId] = new List<Vertex>();
@@ -107,8 +105,6 @@ namespace es.ucm.fdi.iav.rts
                     continue;
                 if (i == row && j == col)
                     continue;
-                if (!mapVertices[i, j])
-                    continue;
 
                 //Si ha sido valida la introducimos definitivamente
                 int id = GridToId(i, j);
@@ -130,36 +126,12 @@ namespace es.ucm.fdi.iav.rts
             Queue<Vector2> queue = new Queue<Vector2>();
             queue.Enqueue(p);
 
-            //
-            do
-            {
-                p = queue.Dequeue();
-                col = (int)p.x;
-                row = (int)p.y;
-                int id = GridToId(col, row);
-                if (mapVertices[row, col])
-                    return vertices[id];
-
-                if (!explored.Contains(p))
-                {
-                    explored.Add(p);
-                    int i, j;
-                    for (i = row - 1; i <= row + 1; i++)
-                    {
-                        for (j = col - 1; j <= col + 1; j++)
-                        {
-                            if (i < 0 || j < 0)
-                                continue;
-                            if (j >= numCols || i >= numRows)
-                                continue;
-                            if (i == row && j == col)
-
-                                queue.Enqueue(new Vector2(j, i));
-                        }
-                    }
-                }
-            } while (queue.Count != 0);
-            return null;
+            //          
+            p = queue.Dequeue();
+            col = (int)p.x;
+            row = (int)p.y;
+            int id = GridToId(col, row);
+            return vertices[id];                
         }
 
         public Vertex getRandomVertex()

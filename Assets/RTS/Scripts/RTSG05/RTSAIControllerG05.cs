@@ -4,7 +4,7 @@ namespace es.ucm.fdi.iav.rts.G05
 {
     public class RTSAIControllerG05: RTSAIController
     {
-        private int MyIndex { get; set; }
+        public int MyIndex { get; set; }
         private int FirstEnemyIndex { get; set; }
         private BaseFacility MyFirstBaseFacility { get; set; }
         private ProcessingFacility MyFirstProcessingFacility { get; set; }
@@ -22,14 +22,15 @@ namespace es.ucm.fdi.iav.rts.G05
         {
             Name = "Final";
             Author = "Sergio Molinero-Andrés Carnicero";
-            influenceMap.Load();
+            influenceMap = GetComponent<InfluenceMap>();
+            MyIndex = RTSGameManager.Instance.GetIndex(this);
         }
 
         // El método de pensar que sobreescribe e implementa el controlador, para percibir (hacer mapas de influencia, etc.) y luego actuar.
         protected override void Think()
         {
             // Actualizo el mapa de influencia 
-            influenceMap.mapFloodDijkstra(MyIndex);
+            influenceMap.ComputeInfluence();
 
             // Para las órdenes aquí estoy asumiendo que tengo dinero de sobra y que se dan las condiciones de todas las cosas...
             // (Ojo: esto no debería hacerse porque si me equivoco, causaré fallos en el juego... hay que comprobar que cada llamada tiene sentido y es posible hacerla)
@@ -40,7 +41,6 @@ namespace es.ucm.fdi.iav.rts.G05
             {
                 case 0:
                     // Lo primer es conocer el índice que me ha asignado el gestor del juego
-                    MyIndex = RTSGameManager.Instance.GetIndex(this);
 
                     // Obtengo referencias a mis cosas
                     MyFirstBaseFacility = RTSGameManager.Instance.GetBaseFacilities(MyIndex)[0];

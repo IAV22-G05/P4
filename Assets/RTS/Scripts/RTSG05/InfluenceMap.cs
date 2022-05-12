@@ -7,6 +7,7 @@ namespace es.ucm.fdi.iav.rts
 {
     public class InfluenceMap : GraphGrid
     {
+        List<Unit> units;
         [SerializeField]
         float strengthThreshold = 1;
 
@@ -18,14 +19,13 @@ namespace es.ucm.fdi.iav.rts
 
         public override void Load()
         {
-            numCols = (int)(RTSScenarioManager.Instance.Scenario.terrainData.size.x / 10);
-            numRows = (int)(RTSScenarioManager.Instance.Scenario.terrainData.size.z / 10);
+            units = new List<Unit>();
+            numCols = (int)(RTSScenarioManager.Instance.Scenario.terrainData.size.x / cellSize);
+            numRows = (int)(RTSScenarioManager.Instance.Scenario.terrainData.size.z / cellSize);
 
             vertices = new List<Vertex>(numRows * numCols);
             neighbors = new List<List<Vertex>>(numRows * numCols);
-            costs = new List<List<float>>(numRows * numCols);
             vertexObjs = new GameObject[numRows * numCols];
-            mapVertices = new bool[numRows, numCols];
 
             Vector3 position = Vector3.zero;
             int id;
@@ -37,16 +37,15 @@ namespace es.ucm.fdi.iav.rts
                     position.z = i * cellSize + RTSScenarioManager.Instance.Scenario.GetPosition().z;
                     id = GridToId(i, j);
                     bool isVertex = (RTSScenarioManager.Instance.Scenario.SampleHeight(position) == 0);
-                    mapVertices[i, j] = isVertex;
                     vertexObjs[id] = Instantiate(vertexPrefab, position, Quaternion.identity) as GameObject;
                     vertexObjs[id].name = vertexObjs[id].name.Replace("(Clone)", id.ToString());
                     Vertex v = vertexObjs[id].AddComponent<Vertex>();
                     v.id = id;
-                    v.strength = 5;
+                    v.influence = 5;
                     vertices.Add(v);
                     neighbors.Add(new List<Vertex>());
                     if (!isVertex)
-                    {                        
+                    {
                         vertexObjs[id].SetActive(false);
                     }
                 }
@@ -76,7 +75,7 @@ namespace es.ucm.fdi.iav.rts
             {
                 start = GetNearestVertex(bases[i].transform.position);
                 start.controller = index;
-                start.strength = strengthFunction(start.controller, start) + 5;
+                start.influence = strengthFunction(start.controller, start) + 5;
                 open.Add(start);
             }
 
@@ -96,19 +95,19 @@ namespace es.ucm.fdi.iav.rts
                     else if (closed.Contains(v))
                     {
                         neighborRecord = closed.Find(v);
-                        if (neighborRecord.controller != v.controller && neighborRecord.strength < strength)
+                        if (neighborRecord.controller != v.controller && neighborRecord.influence < strength)
                             continue;
                     }
                     else if (open.Contains(v))
                     {
                         neighborRecord = open.Find(v);
-                        if (neighborRecord.strength < strength)
+                        if (neighborRecord.influence < strength)
                             continue;
                     }
-                        
+
                     neighborRecord = new Vertex();
                     neighborRecord.controller = current.controller;
-                    neighborRecord.strength = strength;
+                    neighborRecord.influence = strength;
                     open.Add(neighborRecord);
                 }
 
@@ -119,6 +118,35 @@ namespace es.ucm.fdi.iav.rts
             return closed;
         }
 
+        public void ComputeInfluence()
+        {
+            List<Vertex> open = new List<Vertex>();
+            List<Vertex> closed = new List<Vertex>();
+            List<Vertex> frontier;
+            Vertex[] neighbours;
+
+            foreach(Unit u in units)
+            {
+                Vertex v = GetNearestVertex(u.transform.position);
+                open.Add(v);
+
+                for(int i = 1; i <= u.Radius; ++i)
+                {
+                    frontier = new List<Vertex>();
+                    foreach(Vertex o in open)
+                    {
+                        if (closed.Contains(o))
+                            continue;
+                        closed.Add(o);
+                        vertices[o.id].influence += u.DropOff(i);
+                        neighbours = GetNeighbours(v);
+                        frontier.AddRange(neighbours);
+                    }
+                    open = new List<Vertex>(frontier);
+                }
+            }
+        }
+
         public float strengthFunction(int controller, Vertex v)
         {
             float strength = 0;
@@ -127,19 +155,18 @@ namespace es.ucm.fdi.iav.rts
                 return 0;
 
             Vector3 vertexPos = IdToGrid(v.id);
-            // xd
             vertexPos.z = vertexPos.y;
             vertexPos.y = 0;
             for (int i = 0; i < bases.Count; ++i)
-                strength += 5 / Vector3.Distance(vertexPos, bases[i].transform.position);
+                strength += 50 / Vector3.Distance(vertexPos, bases[i].transform.position);
 
             List<DestructionUnit> destructionUnits = RTSGameManager.Instance.GetDestructionUnits(controller);
             for (int i = 0; i < destructionUnits.Count; ++i)
-                strength += 3 / Vector3.Distance(vertexPos, destructionUnits[i].transform.position);
+                strength += 30 / Vector3.Distance(vertexPos, destructionUnits[i].transform.position);
 
             List<ExplorationUnit> explorationUnits = RTSGameManager.Instance.GetExplorationUnits(controller);
             for (int i = 0; i < explorationUnits.Count; ++i)
-                strength += 1 / Vector3.Distance(vertexPos, explorationUnits[i].transform.position);
+                strength += 10 / Vector3.Distance(vertexPos, explorationUnits[i].transform.position);
 
             return strength;
         }
@@ -151,27 +178,38 @@ namespace es.ucm.fdi.iav.rts
             {
                 for (int j = 0; j < numCols; ++j)
                 {
-                    if (mapVertices[i, j])
-                    {
-                        //Setear el material en funcion de la fuerza de 
-                        int id = GridToId(i, j);
-                        Material mat = vertexObjs[id].GetComponent<MeshRenderer>().material;
+                    //Setear el material en funcion de la fuerza de 
+                    int id = GridToId(i, j);
+                    Material mat = vertexObjs[id].GetComponent<MeshRenderer>().material;
 
-                        float colorFactor = vertices[id].strength / MAX_STRENGTH;
-                        float inverse = 1 - colorFactor;
-                        Color newColor;
+                    float colorFactor = vertices[id].influence / MAX_STRENGTH;
+                    float inverse = 1 - colorFactor;
+                    Color newColor;
 
-                        //Harkonen Azul
-                        if (bando)
-                            newColor = new Color(inverse, inverse, 1, 0.3f);
-                        //Fremen Amarillo
-                        else
-                            newColor = new Color(1, 1, inverse, 0.3f);
+                    //Harkonen Azul
+                    if (bando)
+                        newColor = new Color(inverse, inverse, 1, 0.3f);
+                    //Fremen Amarillo
+                    else
+                        newColor = new Color(1, 1, inverse, 0.3f);
 
-                        mat.SetColor("_Color", newColor);
-                    }
+                    mat.SetColor("_Color", newColor);
                 }
             }
         }
+
+        public void AddUnit(Unit u)
+        {
+            if (units.Contains(u))
+                return;
+            units.Add(u);
+        }
+
+        public void RemoveUnit(Unit u)
+        {
+            units.Remove(u);
+        }
     }
 }
+
+

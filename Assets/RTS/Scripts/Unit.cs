@@ -12,6 +12,8 @@
 using UnityEngine;
 using BehaviorDesigner.Runtime;
 using System;
+using System.Collections.Generic;
+using es.ucm.fdi.iav.rts.G05;
 
 namespace es.ucm.fdi.iav.rts
 {
@@ -240,6 +242,27 @@ namespace es.ucm.fdi.iav.rts
 
             // Y finalmente se autodestruye
             Destroy(gameObject);
+        }
+
+        [SerializeField]
+        private float influence = 1;
+        public float DropOff(int distance)
+        {
+            float drop = influence / _radius * distance;
+            return influence - drop;
+        }
+
+        private void Start()
+        {
+            List<RTSController> controllers = RTSGameManager.Instance.Controllers;
+            for(int i = 0; i < controllers.Count; ++i)
+            {
+                InfluenceMap map = controllers[i].gameObject.GetComponent<InfluenceMap>();
+                if (map && i == controllers[i].GetComponent<RTSAIControllerG05>().MyIndex)
+                {
+                    map.AddUnit(this);
+                }
+            }
         }
     }
 }
