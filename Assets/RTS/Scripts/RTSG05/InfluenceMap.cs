@@ -32,15 +32,16 @@ namespace es.ucm.fdi.iav.rts
                     id = GridToId(i, j);
                     bool isVertex = (RTSScenarioManager.Instance.Scenario.SampleHeight(position) == 0);
                     mapVertices[i, j] = isVertex;
-                    if (isVertex)
-                    {
-                        vertexObjs[id] = Instantiate(vertexPrefab, position, Quaternion.identity) as GameObject;
-                        vertexObjs[id].name = vertexObjs[id].name.Replace("(Clone)", id.ToString());
-                        Vertex v = vertexObjs[id].AddComponent<Vertex>();
-                        v.id = id;
-                        v.strength = 5;
-                        vertices.Add(v);
-                        neighbors.Add(new List<Vertex>());
+                    vertexObjs[id] = Instantiate(vertexPrefab, position, Quaternion.identity) as GameObject;
+                    vertexObjs[id].name = vertexObjs[id].name.Replace("(Clone)", id.ToString());
+                    Vertex v = vertexObjs[id].AddComponent<Vertex>();
+                    v.id = id;
+                    v.strength = 5;
+                    vertices.Add(v);
+                    neighbors.Add(new List<Vertex>());
+                    if (!isVertex)
+                    {                        
+                        vertexObjs[id].SetActive(false);
                     }
                 }
             }

@@ -111,7 +111,7 @@ namespace es.ucm.fdi.iav.rts
                     continue;
 
                 //Si ha sido valida la introducimos definitivamente
-                int id = GridToId(j, i);
+                int id = GridToId(i, j);
                 neighbors[vertexId].Add(vertices[id]);
             }
         }
